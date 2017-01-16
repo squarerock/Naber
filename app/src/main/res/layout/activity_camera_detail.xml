@@ -1,0 +1,66 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rldetailsContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/ivProfile"
+        android:layout_width="match_parent"
+        android:src="@drawable/ic_wifi"
+        android:transitionName="ivProfileTransition"
+        android:layout_marginBottom="8dp"
+        android:layout_height="200dp" />
+
+    <TextView
+        android:id="@+id/tvSsid"
+        android:text="tb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:layout_below="@id/ivProfile"/>
+
+    <TextView
+        android:id="@+id/tvBssid"
+        android:text="12:43:51"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:layout_below="@id/tvSsid"/>
+
+    <TextView
+        android:id="@+id/tvCapabilities"
+        android:text="wpa2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:layout_below="@id/tvBssid"
+        />
+
+    <TextView
+        android:id="@+id/tvLevel"
+        android:text="-91dBm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:layout_below="@id/tvCapabilities"
+        />
+
+    <TextView
+        android:id="@+id/tvVenueName"
+        android:text="Home"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_below="@id/tvLevel"
+        />
+</RelativeLayout>
