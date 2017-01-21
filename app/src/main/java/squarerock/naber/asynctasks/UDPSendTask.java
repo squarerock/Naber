@@ -1,5 +1,6 @@
 package squarerock.naber.asynctasks;
 
+import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.text.format.Formatter;
@@ -34,12 +35,16 @@ public class UDPSendTask extends AsyncTask<String, Void, Void> {
         String jsonMessage = strings[0];
         DatagramSocket s = null;
         try {
-            String ip = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
             s = new DatagramSocket();
-            InetAddress local = InetAddress.getByName(ip);
-            int msg_length= jsonMessage.length();
+            s.setBroadcast(true);
+
+            String ip = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
+            InetAddress local = getBroadcastAddress();
+
+//            int msg_length= jsonMessage.length();
             byte[] message = jsonMessage.getBytes();
-            DatagramPacket p = new DatagramPacket(message, msg_length,local, Constants.HUB_BROADCAST_UDP_PORT);
+
+            DatagramPacket p = new DatagramPacket(message, message.length, local, Constants.HUB_BROADCAST_UDP_PORT);
             s.send(p);
         } catch (IOException e) {
             e.printStackTrace();
@@ -55,5 +60,19 @@ public class UDPSendTask extends AsyncTask<String, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         callback.onDataSent();
+    }
+
+    InetAddress getBroadcastAddress() throws IOException {
+        DhcpInfo dhcp = wifiManager.getDhcpInfo();
+        // handle null somehow
+        if(dhcp != null) {
+            int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
+            byte[] quads = new byte[4];
+            for (int k = 0; k < 4; k++)
+                quads[k] = (byte) ((broadcast >> k * 8) & 0xFF);
+            return InetAddress.getByAddress(quads);
+        } else {
+            return InetAddress.getByName(Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress()));
+        }
     }
 }

@@ -28,15 +28,17 @@ public class WifiStateChangeReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         Log.d(TAG, "onReceive: "+action);
-        if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-            NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-            WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
-            if (networkInfo != null && wifiInfo != null && networkInfo.isConnected()) {
-                if(wifiInfo.getSSID().toUpperCase().startsWith(Constants.ID_HUB)){
-                    Log.d(TAG, "onReceive: connected to hub");
-                    callback.onConnectedToHub();
-                } else {
-                    Log.d(TAG, "onReceive: connected to: "+wifiInfo.getSSID());
+        if(!isInitialStickyBroadcast()) {
+            if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+                NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
+                if (networkInfo != null && wifiInfo != null && networkInfo.isConnected()) {
+                    if (wifiInfo.getSSID().toUpperCase().startsWith(Constants.ID_HUB)) {
+                        Log.d(TAG, "onReceive: connected to hub");
+                        callback.onConnectedToHub();
+                    } else {
+                        Log.d(TAG, "onReceive: connected to: " + wifiInfo.getSSID());
+                    }
                 }
             }
         }

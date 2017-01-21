@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements MainView,
     }
 
     private void checkForHubAndCamera() {
-        if(!adapter.isCameraFound() || !adapter.isHubFound()){
+        if(/*!adapter.isCameraFound() ||*/ !adapter.isHubFound()){
             displayMessage("Camera or hub not found. Try refreshing again");
             btnNext.setEnabled(false);
         } else {

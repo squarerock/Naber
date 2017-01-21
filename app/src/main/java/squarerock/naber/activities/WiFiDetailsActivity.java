@@ -62,7 +62,9 @@ public class WiFiDetailsActivity extends AppCompatActivity implements WifiConnec
 
         Log.d(TAG, "getJsonString: "+jsonString);
 
-        hubNetworkId = presenter.addWifiNetwork(getPreferences(Context.MODE_PRIVATE).getString(Constants.ID_HUB, ""), Constants.HUB_PASSWORD);
+        hubNetworkId = presenter.addWifiNetwork(
+                PreferencesManager.getString(this, Constants.PREF_NABER, Constants.ITEM_HUB),
+                Constants.HUB_PASSWORD);
     }
 
     private void initReceiver(){
@@ -76,7 +78,9 @@ public class WiFiDetailsActivity extends AppCompatActivity implements WifiConnec
     protected void onStop() {
         super.onStop();
         unregisterReceiver(wifiStateChangeReceiver);
-        task.cancel(true);
+        if(task != null) {
+            task.cancel(true);
+        }
     }
 
     @Override
