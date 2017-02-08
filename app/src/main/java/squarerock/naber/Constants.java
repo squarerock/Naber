@@ -10,7 +10,7 @@ public class Constants {
     public static final String ITEM_CAMERA = "item_camera";
 
     public static final String ID_HUB = "NABER";
-    public static final String HUB_PASSWORD = "87654321"; //Change Password here
+    public static final String HUB_PASSWORD = "12345678"; //Change Password here
     public static final String ID_CAMERA = "GW_IPC_";
 
     public static final String PREF_NABER = "prefs_naber";

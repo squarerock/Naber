@@ -77,7 +77,10 @@ public class WiFiDetailsActivity extends AppCompatActivity implements WifiConnec
     @Override
     protected void onStop() {
         super.onStop();
-        unregisterReceiver(wifiStateChangeReceiver);
+        if(wifiStateChangeReceiver != null) {
+            unregisterReceiver(wifiStateChangeReceiver);
+        }
+
         if(task != null) {
             task.cancel(true);
         }
@@ -85,8 +88,14 @@ public class WiFiDetailsActivity extends AppCompatActivity implements WifiConnec
 
     @Override
     public void onConnectedToHub() {
+        Log.d(TAG, "onConnectedToHub: Executing UDP task");
         task = new UDPSendTask(this, wifiManager);
         task.execute(jsonString);
+        /*if(task!= null) {
+        }
+        else{
+            Log.d(TAG, "onConnectedToHub: Already executed task");
+        }*/
     }
 
     @Override

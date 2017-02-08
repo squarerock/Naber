@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-
-import squarerock.naber.Constants;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 /**
  * Created by pranavkonduru on 1/15/17.
@@ -34,7 +34,7 @@ public class UDPSendTask extends AsyncTask<String, Void, Void> {
     protected Void doInBackground(String... strings) {
         String jsonMessage = strings[0];
         DatagramSocket s = null;
-        try {
+        /*try {
             s = new DatagramSocket();
             s.setBroadcast(true);
 
@@ -52,7 +52,26 @@ public class UDPSendTask extends AsyncTask<String, Void, Void> {
             if(s != null && s.isConnected()){
                 s.close();
             }
+        }*/
+
+
+        int server_port = 34567;
+        try {
+            s = new DatagramSocket();
+            InetAddress local = InetAddress.getByName("192.168.4.111");
+            int msg_length=jsonMessage.length();
+            byte[] message = jsonMessage.getBytes();
+            DatagramPacket p = new DatagramPacket(message, msg_length,local,server_port);
+            s.send(p);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+
         return null;
     }
 
