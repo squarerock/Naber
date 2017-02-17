@@ -34,9 +34,11 @@ public class WifiDetailsPresenter implements IWifiDetailsPresenter {
         wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
         wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+
         int netId = wifiManager.addNetwork(wc);
         wifiManager.disconnect();
         wifiManager.enableNetwork(netId, true);
+
         wifiManager.setWifiEnabled(true);
         wifiManager.reconnect();
 

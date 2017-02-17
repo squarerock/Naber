@@ -8,4 +8,7 @@
     <string name="tv_wifi_details">Enter WiFi details here. These will be used by Hub to connect to your WiFi</string>
     <string name="next">Next</string>
     <string name="configure">Configure</string>
+    <string name="share">Share</string>
+    <string name="email_address_or_phone_number">Email address or Phone number</string>
+    <string name="share_string">Enter the email address or phone number of the users whom you want to share this camera with</string>
 </resources>

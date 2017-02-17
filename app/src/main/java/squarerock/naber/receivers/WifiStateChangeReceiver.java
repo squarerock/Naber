@@ -34,6 +34,7 @@ public class WifiStateChangeReceiver extends BroadcastReceiver {
                 WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
                 if (networkInfo != null && wifiInfo != null && networkInfo.isConnected()) {
                     String ssid = wifiInfo.getSSID().replace("\"","");
+                    Log.d(TAG, "onReceive: connected to: "+ssid);
                     if (ssid.toUpperCase().startsWith(Constants.ID_HUB)) {
                         Log.d(TAG, "onReceive: connected to hub");
                         callback.onConnectedToHub();

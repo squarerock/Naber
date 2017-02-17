@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/share_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <!--<android.support.design.widget.TextInputLayout-->
+        <!--android:id="@+id/til_contact"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_margin="8dp"-->
+        <!--&gt;-->
+        <!--<android.support.design.widget.TextInputEditText-->
+            <!--android:id="@+id/et_contact"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:hint="@string/email_address_or_phone_number"/>-->
+    <!--</android.support.design.widget.TextInputLayout>-->
+
+    <TextView
+        android:id="@+id/tv_share"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_margin="8dp"
+        android:text="@string/share_string"
+        android:gravity="center"
+        />
+
+    <MultiAutoCompleteTextView
+        android:id="@+id/et_contact"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_share"
+        android:layout_margin="8dp"
+        />
+
+    <Button
+        android:id="@+id/btn_share"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/share"
+        android:layout_below="@id/et_contact"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:textAllCaps="true"
+        android:background="?android:selectableItemBackground"
+        android:textColor="@color/colorAccent"
+        />
+</RelativeLayout>

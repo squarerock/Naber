@@ -24,7 +24,7 @@ import squarerock.naber.R;
 public class HubItemAdapter extends RecyclerView.Adapter<HubItemAdapter.HubViewHolder> {
 
     public interface HubItemClickCallback {
-        void onConfigureClicked(int position);
+        void onShareClicked(int position);
         void onItemChosen(int position);
     }
 
@@ -91,14 +91,14 @@ public class HubItemAdapter extends RecyclerView.Adapter<HubItemAdapter.HubViewH
     public class HubViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.ivHub) ImageView ivCamera;
         @BindView(R.id.tvWifiId) TextView tvWifiId;
-        @BindView(R.id.ivSettings) ImageView ivSettings;
+        @BindView(R.id.ivShare) ImageView ivShare;
 
         public HubViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
 
-        @OnClick({R.id.ivHub, R.id.ivSettings})
+        @OnClick({R.id.ivHub, R.id.ivShare})
         public void onItemClicked(View view) {
             int position = getAdapterPosition();
 
@@ -107,8 +107,8 @@ public class HubItemAdapter extends RecyclerView.Adapter<HubItemAdapter.HubViewH
                     Log.d(TAG, "onItemClicked: "+itemView);
                     callback.onItemChosen(position);
                     break;
-                case R.id.ivSettings:
-                    callback.onConfigureClicked(position);
+                case R.id.ivShare:
+                    callback.onShareClicked(position);
                     break;
             }
         }

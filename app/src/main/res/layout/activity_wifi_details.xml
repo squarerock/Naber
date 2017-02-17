@@ -14,7 +14,7 @@
         android:textStyle="bold"
         android:textSize="16sp"/>
 
-    <android.support.design.widget.TextInputLayout
+    <!--<android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Wifi SSID"
@@ -24,7 +24,14 @@
             android:id="@+id/et_wifi_ssid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-    </android.support.design.widget.TextInputLayout>
+    </android.support.design.widget.TextInputLayout>-->
+
+    <Spinner
+        android:id="@+id/spnr_wifi_ssid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp">
+    </Spinner>
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"

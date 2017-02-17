@@ -13,38 +13,46 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
+
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import squarerock.naber.Constants;
 import squarerock.naber.PreferencesManager;
 import squarerock.naber.R;
 import squarerock.naber.adapters.HubItemAdapter;
+import squarerock.naber.database.QueryHelper;
+import squarerock.naber.interfaces.ICameraInviteCallback;
 import squarerock.naber.interfaces.IMainPresenter;
 import squarerock.naber.interfaces.views.MainView;
+import squarerock.naber.models.CameraInvite;
 import squarerock.naber.presenters.MainPresenter;
 
 public class MainActivity extends AppCompatActivity implements MainView,
-        SwipeRefreshLayout.OnRefreshListener, HubItemAdapter.HubItemClickCallback, HubItemAdapter.DiscoveredItemsCallback {
+        SwipeRefreshLayout.OnRefreshListener, HubItemAdapter.HubItemClickCallback, HubItemAdapter.DiscoveredItemsCallback, ICameraInviteCallback {
 
     private IMainPresenter presenter;
     private WifiManager wifiManager;
-    private List<ScanResult> scanResults;
+    private ArrayList<ScanResult> scanResults;
     private HubItemAdapter adapter;
+    private DatabaseReference cameraInviteRef;
 
     @BindView(R.id.rvCameras) RecyclerView rvCameras;
     @BindView(R.id.swipeRefresh) SwipeRefreshLayout swipeRefreshLayout;
-    @BindView(R.id.btnNext) Button btnNext;
+    /*@BindView(R.id.btnNext) Button btnNext;*/
 
     private static final String TAG = "MainActivity";
     private BroadcastReceiver wifiDetectReceiver;
+    private String cameraInviteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +73,25 @@ public class MainActivity extends AppCompatActivity implements MainView,
 
         //initReceiver();
         initWifiDetectReceiver();
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        cameraInviteRef = database.getReference(Constants.CAMERA_INVITE_TABLE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        updateListOfCameras();
+        // Make two calls here:
+        // 1. Get user object with all available cameras. This should be one of the first calls once into the app.
+        // 2. Get new camera invite requests. Once accepted, update user object.
+        // Compare both. If there are more invites, take user to accept invite. If less invites, remove camera from user object and update.
+        // If no change, take the user to search cameras page
+        queryForNewCameraRequests();
+    }
+
+    private void queryForNewCameraRequests() {
+        QueryHelper helper = new QueryHelper();
+        helper.getCameraInvitesForUser(this);
     }
 
     @Override
@@ -84,7 +105,13 @@ public class MainActivity extends AppCompatActivity implements MainView,
     protected void onPause() {
         super.onPause();
 //        unregisterReceiver(mReceiver);
-        unregisterReceiver(wifiDetectReceiver);
+        if(wifiDetectReceiver != null) {
+            try {
+                unregisterReceiver(wifiDetectReceiver);
+            } catch (Exception e){
+                Log.d(TAG, "onPause: already unregistered");
+            }
+        }
     }
 
     @Override
@@ -141,12 +168,15 @@ public class MainActivity extends AppCompatActivity implements MainView,
     }
 
     @Override
-    public void onConfigureClicked(int position) {
+    public void onShareClicked(int position) {
         /*ScanResult scanResult = adapter.getItemAtPosition(position);
         FragmentManager fm = getSupportFragmentManager();
         ConfigureCameraFragment editNameDialogFragment = ConfigureCameraFragment.newInstance(scanResult.SSID);
         editNameDialogFragment.show(fm, "fragment_edit_name");*/
-        displayMessage(adapter.getItemAtPosition(position).SSID);
+//        displayMessage(adapter.getItemAtPosition(position).SSID);
+        Intent intent = new Intent(this, ShareCameraActivity.class);
+        intent.putExtra(Constants.EXTRA_SHARE_CAMERA_ID, adapter.getItemAtPosition(position).SSID);
+        startActivity(intent);
     }
 
     @Override
@@ -156,7 +186,15 @@ public class MainActivity extends AppCompatActivity implements MainView,
         intent.putExtra(CameraDetailActivity.EXTRA_SCAN_RESULT, scanResult);
         startActivity(intent);*/
 
-        displayMessage(adapter.getItemAtPosition(position).SSID);
+//        displayMessage(adapter.getItemAtPosition(position).SSID);
+        Intent intent = new Intent(this, WiFiDetailsActivity.class);
+        ArrayList<String> ssids = new ArrayList<>();
+        for(ScanResult result : scanResults){
+            ssids.add(result.SSID);
+        }
+        intent.putStringArrayListExtra(Constants.EXTRA_SCAN_RESULTS, ssids);
+//        intent.putParcelableArrayListExtra(Constants.EXTRA_SCAN_RESULTS, scanResults);
+        startActivity(intent);
     }
 
     private void initWifiDetectReceiver(){
@@ -164,7 +202,8 @@ public class MainActivity extends AppCompatActivity implements MainView,
             @Override
             public void onReceive(Context context, Intent intent) {
                 hideRefreshIcon();
-                adapter.add(wifiManager.getScanResults());
+                scanResults = new ArrayList<>(wifiManager.getScanResults());
+                adapter.add(scanResults);
 
                 checkForHubAndCamera();
             }
@@ -174,20 +213,35 @@ public class MainActivity extends AppCompatActivity implements MainView,
     private void checkForHubAndCamera() {
         if(/*!adapter.isCameraFound() ||*/ !adapter.isHubFound()){
             displayMessage("Camera or hub not found. Try refreshing again");
-            btnNext.setEnabled(false);
+            /*btnNext.setEnabled(false);*/
         } else {
-            btnNext.setEnabled(true);
+            /*btnNext.setEnabled(true);*/
         }
-    }
-
-    @OnClick(R.id.btnNext)
-    public void nextClicked(){
-        startActivity(new Intent(this, WiFiDetailsActivity.class));
     }
 
     @Override
     public void onItemDiscovered(String type, String SSID) {
         // Save the items for later use
         PreferencesManager.putString(this, Constants.PREF_NABER, type, SSID);
+    }
+
+    @Override
+    public void cameraInvitesFound(List<CameraInvite> invites) {
+        Log.d(TAG, "cameraInvitesFound: ");
+        for(CameraInvite invite: invites){
+            Log.d(TAG, "cameraInvitesFound: "+invite.getInvitedBy());
+        }
+    }
+
+    @Override
+    public void cameraInvitesNotFound() {
+        Log.d(TAG, "cameraInvitesNotFound: ");
+        updateListOfCameras();
+    }
+
+    @Override
+    public void operationCancelled(DatabaseError error) {
+        Log.d(TAG, "operationCancelled: "+ error.getMessage());
+        updateListOfCameras();
     }
 }

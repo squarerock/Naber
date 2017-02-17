@@ -3,20 +3,23 @@ package squarerock.naber.asynctasks;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.text.format.Formatter;
+import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.SocketTimeoutException;
 
 /**
  * Created by pranavkonduru on 1/15/17.
  */
 
 public class UDPSendTask extends AsyncTask<String, Void, Void> {
+
+    private static final String TAG = "UDPSendTask";
 
     public interface UDPSendCallback{
         void onDataSent();
@@ -33,52 +36,98 @@ public class UDPSendTask extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... strings) {
         String jsonMessage = strings[0];
-        DatagramSocket s = null;
-        /*try {
-            s = new DatagramSocket();
-            s.setBroadcast(true);
+        DatagramSocket sendingSocket = null;
 
-            String ip = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
-            InetAddress local = getBroadcastAddress();
-
-//            int msg_length= jsonMessage.length();
-            byte[] message = jsonMessage.getBytes();
-
-            DatagramPacket p = new DatagramPacket(message, message.length, local, Constants.HUB_BROADCAST_UDP_PORT);
-            s.send(p);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(s != null && s.isConnected()){
-                s.close();
-            }
-        }*/
-
-
-        int server_port = 34567;
         try {
-            s = new DatagramSocket();
-            InetAddress local = InetAddress.getByName("192.168.4.111");
-            int msg_length=jsonMessage.length();
-            byte[] message = jsonMessage.getBytes();
-            DatagramPacket p = new DatagramPacket(message, msg_length,local,server_port);
-            s.send(p);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            Log.d(TAG, "doInBackground: sleeping pre sending");
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        int localPort = -1;
+        int serverPort = 34567;
+        try {
+            byte[] messageToBeSent = jsonMessage.getBytes();
+            int messageLength = jsonMessage.length();
 
+            sendingSocket = new DatagramSocket();
+            localPort = sendingSocket.getLocalPort();
+
+            InetAddress serverIP = InetAddress.getByName("192.168.4.111");
+            Log.d(TAG, "doInBackground: "+serverIP.getHostAddress());
+            Log.d(TAG, "doInBackground: Port: "+localPort);
+
+
+            DatagramPacket sendingPacket = new DatagramPacket(messageToBeSent, messageLength, serverIP, serverPort);
+            sendingSocket.send(sendingPacket);
+        } catch (IOException e) {
+            Log.e(TAG, "doInBackground: ", e);
+            localPort = -1;
+        } finally {
+            if (sendingSocket != null) {
+                sendingSocket.close();
+            }
+        }
+
+        // Receive response from server
+        byte[] messageToBeReceived = new byte[1500];
+        DatagramPacket receivingPacket = new DatagramPacket(messageToBeReceived, messageToBeReceived.length);
+        DatagramSocket receivingSocket = null;
+        try {
+            receivingSocket = new DatagramSocket(localPort);
+            receivingSocket.setReuseAddress(true);
+            receivingSocket.setSoTimeout(1000);
+
+            while(localPort != -1){
+                try {
+                    receivingSocket.receive(receivingPacket);
+                    String text = new String(messageToBeReceived , 0, receivingPacket.getLength());
+                    if(!TextUtils.isEmpty(text)){
+                        localPort = -1;
+                        Log.d(TAG, "doInBackground: text is: "+text);
+                    }
+
+                } catch (SocketTimeoutException | NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (IOException e) {
+            Log.d(TAG, "doInBackground: ",e);
+            e.printStackTrace();
+        } finally {
+            if (receivingSocket != null) {
+                receivingSocket.close();
+            }
+        }
+
+        try {
+            Log.d(TAG, "doInBackground: sleeping post receive");
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+/*
+        byte[] message = new byte[1500];
+        try{
+            DatagramSocket s_recv = new DatagramSocket(s.getLocalPort());
+            DatagramPacket p_recv = new DatagramPacket(message, message.length);
+            s_recv.receive(p_recv);
+            String recevied_text = new String(message, 0, p_recv.getLength());
+            Log.d(TAG,"message:" + recevied_text );
+            s.close();
+        }catch(Exception e){
+            Log.d(TAG,"error  " + e.toString());
+        }
+*/
         return null;
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        callback.onDataSent();
+//        callback.onDataSent();
     }
 
     InetAddress getBroadcastAddress() throws IOException {
