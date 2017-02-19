@@ -36,6 +36,10 @@ public class UDPSendTask extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... strings) {
         String jsonMessage = strings[0];
+        if(TextUtils.isEmpty(jsonMessage)){
+            return null;
+        }
+
         DatagramSocket sendingSocket = null;
 
         try {
@@ -108,19 +112,6 @@ public class UDPSendTask extends AsyncTask<String, Void, Void> {
             e.printStackTrace();
         }
 
-/*
-        byte[] message = new byte[1500];
-        try{
-            DatagramSocket s_recv = new DatagramSocket(s.getLocalPort());
-            DatagramPacket p_recv = new DatagramPacket(message, message.length);
-            s_recv.receive(p_recv);
-            String recevied_text = new String(message, 0, p_recv.getLength());
-            Log.d(TAG,"message:" + recevied_text );
-            s.close();
-        }catch(Exception e){
-            Log.d(TAG,"error  " + e.toString());
-        }
-*/
         return null;
     }
 
